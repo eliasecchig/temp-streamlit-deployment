@@ -35,7 +35,7 @@ tools = [search]
 
 # 2. Set up the language model
 llm = ChatVertexAI(
-    model="gemini-1.5-pro-001", temperature=0, max_tokens=1024, streaming=True
+    model="gemini-1.5-pro-002", temperature=0, max_tokens=1024, streaming=True
 ).bind_tools(tools)
 
 
@@ -50,7 +50,11 @@ async def call_model(
     state: MessagesState, config: RunnableConfig
 ) -> Dict[str, BaseMessage]:
     """Calls the language model and returns the response."""
-    response = llm.invoke(state["messages"], config)
+    system_message = "You are a helpful AI assistant."
+    messages_with_system = [{"type": "system", "content": system_message}] + state[
+        "messages"
+    ]
+    response = llm.invoke(messages_with_system, config)
     return {"messages": response}
 
 

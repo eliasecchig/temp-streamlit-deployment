@@ -15,9 +15,10 @@
 import logging
 
 import pytest
-from langchain_core.messages import AIMessageChunk
+from langchain_core.messages import AIMessageChunk, HumanMessage
 
 from app.patterns.langgraph_dummy_agent.chain import chain
+from app.utils.output_types import OnToolEndEvent
 
 CHAIN_NAME = "LangGraph agent"
 
@@ -28,13 +29,21 @@ async def test_langgraph_chain_astream_events() -> None:
     Integration testing example for the default LangGraph agent chain. We assert that the chain returns
     events, containing AIMessageChunks.
     """
-    user_message = {"role": "user", "content": f"Test message for {CHAIN_NAME} chain"}
+    user_message = HumanMessage(f"Test message for {CHAIN_NAME} chain")
     input_dict = {"messages": [user_message]}
 
     events = [event async for event in chain.astream_events(input_dict, version="v2")]
 
     assert len(events) > 1, (
         f"Expected multiple events for {CHAIN_NAME} chain, " f"got {len(events)}"
+    )
+    on_tool_end_events = [event for event in events if event["event"] == "on_tool_end"]
+    assert len(on_tool_end_events) == 1, (
+        f"Expected exactly one on_tool_end event for {CHAIN_NAME} chain, "
+        f"got {len(on_tool_end_events)}"
+    )
+    assert isinstance(
+        OnToolEndEvent.model_validate(on_tool_end_events[0]), OnToolEndEvent
     )
 
     on_chain_stream_events = [

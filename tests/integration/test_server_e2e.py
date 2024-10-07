@@ -111,9 +111,9 @@ def test_chat_stream(server_fixture: subprocess.Popen[str]) -> None:
     data = {
         "input": {
             "messages": [
-                {"role": "user", "content": "Hello, AI!"},
-                {"role": "ai", "content": "Hello!"},
-                {"role": "user", "content": "What cooking recipes do you suggest?"},
+                {"type": "human", "content": "Hello, AI!"},
+                {"type": "ai", "content": "Hello!"},
+                {"type": "human", "content": "What cooking recipes do you suggest?"},
             ],
             "user_id": "test-user",
             "session_id": "test-session",
@@ -147,7 +147,7 @@ def test_chat_stream_error_handling(server_fixture: subprocess.Popen[str]) -> No
     """Test the chat stream error handling."""
     logger.info("Starting chat stream error handling test")
 
-    data = {"input": [{"role": "invalid_role", "content": "Cause an error"}]}
+    data = {"input": [{"type": "invalid_type", "content": "Cause an error"}]}
     response = requests.post(
         STREAM_EVENTS_URL, headers=HEADERS, json=data, stream=True, timeout=10
     )
@@ -171,5 +171,4 @@ def test_collect_feedback(server_fixture: subprocess.Popen[str]) -> None:
     }
 
     response = requests.post(FEEDBACK_URL, json=feedback_data, headers=HEADERS)
-    print(response.text)
     assert response.status_code == 200

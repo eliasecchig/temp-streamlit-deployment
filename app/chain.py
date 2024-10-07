@@ -16,7 +16,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_google_vertexai import ChatVertexAI
 
 llm = ChatVertexAI(
-    model_name="gemini-1.5-flash-001",
+    model_name="gemini-1.5-flash-002",
     temperature=0,
     max_output_tokens=1024,
 )

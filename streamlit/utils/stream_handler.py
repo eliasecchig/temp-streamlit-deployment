@@ -21,7 +21,7 @@ import google.auth.transport.requests
 import google.oauth2.id_token
 import requests
 from google.auth.exceptions import DefaultCredentialsError
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, ToolMessage
 
 import streamlit as st
 
@@ -88,7 +88,6 @@ class Client:
         headers = {"Content-Type": "application/json", "Accept": "text/event-stream"}
         if self.authenticate_request:
             headers["Authorization"] = f"Bearer {self.id_token}"
-
         with requests.post(
             self.url, json={"input": data}, headers=headers, stream=True
         ) as response:
@@ -96,7 +95,6 @@ class Client:
                 if line:
                     try:
                         event = json.loads(line.decode("utf-8"))
-                        # print(event)
                         yield event
                     except json.JSONDecodeError:
                         print(f"Failed to parse event: {line.decode('utf-8')}")
@@ -134,7 +132,6 @@ class EventProcessor:
         self.stream_handler = stream_handler
         self.final_content = ""
         self.tool_calls: List[Dict[str, Any]] = []
-        self.tool_calls_outputs: List[Dict[str, Any]] = []
         self.additional_kwargs: Dict[str, Any] = {}
         self.current_run_id: Optional[str] = None
 
@@ -155,9 +152,9 @@ class EventProcessor:
             "metadata": self.handle_metadata,
             "end": self.handle_end,
             "on_tool_start": self.handle_tool_start,
-            "on_tool_end": self.handle_tool_end,
-            "on_retriever_end": self.handle_tool_end,
             "on_retriever_start": self.handle_tool_start,
+            "on_tool_end": self.handle_tool_and_retriever_end,
+            "on_retriever_end": self.handle_tool_and_retriever_end,
             "on_chat_model_stream": self.handle_chat_model_stream,
         }
 
@@ -178,28 +175,36 @@ class EventProcessor:
         )
         self.stream_handler.new_status(msg)
 
-    def handle_tool_end(self, event: Dict[str, Any]) -> None:
+    def handle_tool_and_retriever_end(self, event: Dict[str, Any]) -> None:
         """Handle the end of a tool execution."""
         data = event["data"]
-        # Support tool events
+
+        # support for on_tool_end event
         if isinstance(data["output"], dict):
-            tool_id = data["output"].get("tool_call_id", None)
-            tool_name = data["output"].get("name", "Unknown Tool")
-        # Support retriever events
-        else:
-            tool_id = event.get("id", "None")
+            tool_id = data["output"].get("tool_call_id")
+            tool_name = data["output"].get("name")
+            tool_output = data["output"]
+
+        # support for on_retriever_end event
+        elif isinstance(data["output"], list):
+            tool_id = event.get("id", "retriever")
             tool_name = event.get("name", event["event"])
-
+            tool_output = {"tool_call_id": tool_name, "content": data["output"]}
+        else:
+            raise ValueError(
+                f"Unexpected data type for tool output: {type(data['output'])}"
+            )
         tool_input = data["input"]
-        tool_output = data["output"]
-
-        tool_call = {"id": tool_id, "name": tool_name, "args": tool_input}
-        self.tool_calls.append(tool_call)
-        tool_call_outputs = {"id": tool_id, "output": tool_output}
-        self.tool_calls_outputs.append(tool_call_outputs)
+        tool_call_input = AIMessage(
+            content="",
+            tool_calls=[{"id": tool_id, "name": tool_name, "args": tool_input}],
+        )
+        tool_call_output = ToolMessage(**tool_output)
+        self.tool_calls.append(tool_call_input.model_dump())
+        self.tool_calls.append(tool_call_output.model_dump())
         msg = (
-            f"\n\nEnding tool: `{tool_call['name']}` with\n **args:**\n"
-            f"```\n{json.dumps(tool_call['args'], indent=2)}\n```\n"
+            f"\n\nEnding tool: `{tool_name}` with\n **args:**\n"
+            f"```\n{json.dumps(tool_input, indent=2)}\n```\n"
             f"\n\n**output:**\n "
             f"```\n{json.dumps(tool_output, indent=2)}\n```"
         )
@@ -219,15 +224,15 @@ class EventProcessor:
 
     def handle_end(self, event: Dict[str, Any]) -> None:
         """Handle the end of the event stream and finalize the response."""
-        additional_kwargs = self.additional_kwargs
-        additional_kwargs["tool_calls_outputs"] = self.tool_calls_outputs
         final_message = AIMessage(
             content=self.final_content,
-            tool_calls=self.tool_calls,
             id=self.current_run_id,
-            additional_kwargs=additional_kwargs,
+            additional_kwargs=self.additional_kwargs,
         ).model_dump()
         session = self.st.session_state["session_id"]
+        self.st.session_state.user_chats[session]["messages"] = (
+            self.st.session_state.user_chats[session]["messages"] + self.tool_calls
+        )
         self.st.session_state.user_chats[session]["messages"].append(final_message)
         self.st.session_state.run_id = self.current_run_id
 

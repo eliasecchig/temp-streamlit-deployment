@@ -23,11 +23,17 @@ from langchain_google_vertexai import ChatVertexAI, VertexAIEmbeddings
 
 from app.patterns.custom_rag_qa.templates import query_rewrite_template, rag_template
 from app.patterns.custom_rag_qa.vector_store import get_vector_store
-from app.utils.output_types import OnChatModelStreamEvent, OnToolEndEvent, custom_chain
+from app.utils.input_types import extract_human_ai_messages
+from app.utils.output_types import (
+    OnChatModelStreamEvent,
+    OnToolEndEvent,
+    create_on_tool_end_event_from_retrieval,
+    custom_chain,
+)
 
 # Configuration
 EMBEDDING_MODEL = "text-embedding-004"
-LLM_MODEL = "gemini-1.5-flash-001"
+LLM_MODEL = "gemini-1.5-flash-002"
 TOP_K = 5
 
 # Initialize logging
@@ -59,6 +65,9 @@ def chain(
     Implements a RAG QA chain. Decorated with `custom_chain` to offer LangChain compatible astream_events
     and invoke interface and OpenTelemetry tracing.
     """
+    # Separate conversation messages from tool calls
+    input["messages"] = extract_human_ai_messages(input["messages"])
+
     # Generate optimized query
     query = query_gen.invoke(input).content
 
@@ -67,7 +76,7 @@ def chain(
     ranked_docs = compressor.compress_documents(documents=retrieved_docs, query=query)
 
     # Yield tool results metadata
-    yield OnToolEndEvent(data={"input": {"query": query}, "output": ranked_docs})
+    yield create_on_tool_end_event_from_retrieval(query=query, docs=ranked_docs)
 
     # Stream LLM response
     for chunk in response_chain.stream(

@@ -67,6 +67,7 @@ except Exception as e:
 async def stream_event_response(input_chat: InputChat) -> AsyncGenerator[str, None]:
     run_id = uuid.uuid4()
     input_dict = input_chat.model_dump()
+
     Traceloop.set_association_properties(
         {
             "log_type": "tracing",

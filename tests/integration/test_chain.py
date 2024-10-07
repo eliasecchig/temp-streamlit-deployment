@@ -15,7 +15,7 @@
 import logging
 
 import pytest
-from langchain_core.messages import AIMessageChunk
+from langchain_core.messages import AIMessageChunk, HumanMessage
 
 from app.chain import chain
 
@@ -28,7 +28,7 @@ async def test_default_chain_astream_events() -> None:
     Integration testing example for the default dummy chain. We assert that the chain returns events,
     containing AIMessageChunks.
     """
-    user_message = {"role": "user", "content": f"Test message for {CHAIN_NAME} chain"}
+    user_message = HumanMessage(f"Test message for {CHAIN_NAME} chain")
     input_dict = {"messages": [user_message]}
 
     events = [event async for event in chain.astream_events(input_dict, version="v2")]

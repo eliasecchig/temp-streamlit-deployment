@@ -94,9 +94,9 @@ async def test_stream_chat_events() -> None:
             "user_id": "test-user",
             "session_id": "test-session",
             "messages": [
-                {"role": "user", "content": "Hello, AI!"},
-                {"role": "ai", "content": "Hello!"},
-                {"role": "user", "content": "What cooking recipes do you suggest?"},
+                {"type": "human", "content": "Hello, AI!"},
+                {"type": "ai", "content": "Hello!"},
+                {"type": "human", "content": "What cooking recipes do you suggest?"},
             ],
         }
     }

@@ -142,13 +142,9 @@ dmypy.json
 .idea
 
 # User-specific files
-language/examples/prompt-design/train.csv
-README-TOC*.md
-
 .terraform*
 .Terraform*
-terraform.tfstate
-terraform.tfstate.backup
+
 
 tmp*
 

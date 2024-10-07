@@ -18,7 +18,6 @@ from typing import Dict
 
 import yaml
 from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.messages import HumanMessage
 from utils.title_summary import chain_title
 
 
@@ -94,9 +93,20 @@ class LocalChatMessageHistory(BaseChatMessageHistory):
             None
         """
         if session["messages"]:
+
             messages = session["messages"] + [
-                HumanMessage(content="End of conversation - Create a title")
+                {
+                    "type": "human",
+                    "content": "End of conversation - Create one single title",
+                }
             ]
+            # Remove the tool calls from conversation
+            messages = [
+                msg
+                for msg in messages
+                if msg["type"] in ("ai", "human") and msg["content"]
+            ]
+
             title = chain_title.invoke(messages).content.strip()
             session["title"] = title
             self.upsert_session(session)

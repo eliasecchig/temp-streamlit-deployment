@@ -147,9 +147,9 @@ def batch_generate_messages(
 
             ```json
             [
-                {"role": "human", "content": "user's message"},
-                {"role": "ai", "content": "AI's response"},
-                {"role": "human", "content": "current user's message"},
+                {"type": "human", "content": "user's message"},
+                {"type": "ai", "content": "AI's response"},
+                {"type": "human", "content": "current user's message"},
                 ...
             ]
             ```
@@ -181,12 +181,12 @@ def batch_generate_messages(
         messages_df = pd.DataFrame({
             "messages": [
                 [
-                    {"role": "human", "content": "What's the weather today?"}
+                    {"type": "human", "content": "What's the weather today?"}
                 ],
                 [
-                    {"role": "human", "content": "Tell me a joke."},
-                    {"role": "ai", "content": "Why did the scarecrow win an award?"},
-                    {"role": "human", "content": "I don't know, why?"}
+                    {"type": "human", "content": "Tell me a joke."},
+                    {"type": "ai", "content": "Why did the scarecrow win an award?"},
+                    {"type": "human", "content": "I don't know, why?"}
                 ]
             ]
         })

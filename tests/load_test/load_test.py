@@ -31,9 +31,9 @@ class ChatStreamUser(HttpUser):
         data = {
             "input": {
                 "messages": [
-                    {"role": "user", "content": "Hello, AI!"},
-                    {"role": "ai", "content": "Hello!"},
-                    {"role": "user", "content": "Who are you?"},
+                    {"type": "user", "content": "Hello, AI!"},
+                    {"type": "ai", "content": "Hello!"},
+                    {"type": "user", "content": "Who are you?"},
                 ],
                 "user_id": "test-user",
                 "session_id": "test-session",
