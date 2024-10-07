@@ -106,7 +106,7 @@ terraform apply --var-file vars/env.tfvars
 Then deploy the application using the following command (from the root of the repository):
 
 ```bash
-gcloud run deploy conversational-app-sample --source . --project $YOUR_DEV_PROJECT_ID --service-account genai-app-sample-cr-sa@$YOUR_DEV_PROJECT_ID.iam.gserviceaccount.com
+gcloud run deploy genai-app-sample --source . --project $YOUR_DEV_PROJECT_ID --service-account genai-app-sample-cr-sa@$YOUR_DEV_PROJECT_ID.iam.gserviceaccount.com
 ```
 
 ### End-to-end Demo video

@@ -1,4 +1,4 @@
-# 🚀 E2E Gen AI App Starter kit! 🚀
+# 🚀 End-to-End Gen AI App Starter Pack 🚀
 
 > **From Prototype to Production in Minutes.**
 
@@ -6,7 +6,7 @@
 |-|-|
 | Authors | [Elia Secchi](https://github.com/eliasecchig) [Lorenzo Spataro](https://github.com/lspataroG) |
 
-This repository provides a template starter kit for building a Generative AI application on Google Cloud. 
+This repository provides a template starter pack for building a Generative AI application on Google Cloud. 
 
 We provide a comprehensive set of resources to guide you through the entire development process, from prototype to production.
 
@@ -14,7 +14,7 @@ This is a suggested approach, and **you can adapt it to fit your specific needs 
 
 ## High-Level Architecture
 
-This starter kit covers all aspects of Generative AI app development, from prototyping and evaluation to deployment and monitoring.
+This starter pack covers all aspects of Generative AI app development, from prototyping and evaluation to deployment and monitoring.
 
 ![High Level Architecture](images/high_level_architecture.png "Architecture")
 
@@ -25,7 +25,7 @@ This starter kit covers all aspects of Generative AI app development, from proto
 
 | Description                                                                                                                                                                                       | Visualization                            |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| The starter kit includes a production-ready FastAPI server with real-time chat interface, event streaming, auto-generated docs. Designed for scalability and easy integration with monitoring tools. | ![FastAPI docs](images/fastapi_docs.png) |
+| The starter pack includes a production-ready FastAPI server with real-time chat interface, event streaming, auto-generated docs. Designed for scalability and easy integration with monitoring tools. | ![FastAPI docs](images/fastapi_docs.png) |
 
 </details>
 
@@ -96,7 +96,7 @@ This starter kit covers all aspects of Generative AI app development, from proto
 ### Download the starter pack
 
 ```bash
-gsutil -m cp -r gs://e2e-gen-ai-app-starter-kit/repository.zip . && unzip repository.zip
+gsutil -m cp -r gs://e2e-gen-ai-app-starter-pack/repository.zip . && unzip repository.zip
 ```
 
 Use the downloaded folder as a starting point for your own Generative AI application.
@@ -146,7 +146,7 @@ For full command options and usage, refer to the [Makefile](Makefile).
 You can test deployment towards a Dev Environment using the following command:
 
 ```bash
-gcloud run deploy conversational-app-sample --source . --project YOUR_DEV_PROJECT_ID
+gcloud run deploy genai-app-sample --source . --project YOUR_DEV_PROJECT_ID
 ```
 
 The repository includes a Terraform configuration for setup of the Dev Google Cloud project.
@@ -186,7 +186,7 @@ Contributions are welcome! See the [Contributing Guide](CONTRIBUTING.md).
 
 ## Feedback
 
-We value your input! Your feedback helps us improve this starter kit and make it more useful for the community.
+We value your input! Your feedback helps us improve this starter pack and make it more useful for the community.
 
 ### Getting Help
 
@@ -194,7 +194,7 @@ If you encounter any issues or have specific suggestions, please first consider 
 
 ### Share Your Experience
 
-For other types of feedback, or if you'd like to share a positive experience or success story using this starter kit, we'd love to hear from you! You can reach out to us at [e2e-gen-ai-app-starter-kit@google.com](mailto:e2e-gen-ai-app-starter-kit@google.com).
+For other types of feedback, or if you'd like to share a positive experience or success story using this starter pack, we'd love to hear from you! You can reach out to us at [e2e-gen-ai-app-starter-pack@google.com](mailto:e2e-gen-ai-app-starter-pack@google.com).
 
 Thank you for your contributions!
 
