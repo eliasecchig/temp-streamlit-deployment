@@ -12,22 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# mypy: disable-error-code="arg-type"
+# mypy: disable-error-code="arg-type,attr-defined"
 import logging
-from typing import Any, Dict, Iterator
+from typing import Any, Dict, Iterator, List
 
 import google
 import vertexai
+from langchain.schema import Document
+from langchain.tools import tool
+from langchain_core.messages import ToolMessage
 from langchain_google_community.vertex_rank import VertexAIRank
 from langchain_google_vertexai import ChatVertexAI, VertexAIEmbeddings
 
-from app.patterns.custom_rag_qa.templates import query_rewrite_template, rag_template
+from app.patterns.custom_rag_qa.templates import (
+    inspect_conversation_template,
+    rag_template,
+    template_docs,
+)
 from app.patterns.custom_rag_qa.vector_store import get_vector_store
-from app.utils.input_types import extract_human_ai_messages
 from app.utils.output_types import (
     OnChatModelStreamEvent,
     OnToolEndEvent,
-    create_on_tool_end_event_from_retrieval,
     custom_chain,
 )
 
@@ -39,11 +44,16 @@ TOP_K = 5
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
 
+# Initialize Google Cloud and Vertex AI
 credentials, project_id = google.auth.default()
 vertexai.init(project=project_id)
+
+# Set up embedding model and vector store
 embedding = VertexAIEmbeddings(model_name=EMBEDDING_MODEL)
 vector_store = get_vector_store(embedding=embedding)
 retriever = vector_store.as_retriever(search_kwargs={"k": 20})
+
+# Initialize document compressor
 compressor = VertexAIRank(
     project_id=project_id,
     location_id="global",
@@ -51,9 +61,42 @@ compressor = VertexAIRank(
     title_field="id",
     top_n=TOP_K,
 )
+
+
+@tool
+def retrieve_docs(query: str) -> List[Document]:
+    """
+    Useful for retrieving relevant documents based on a query.
+    Use this when you need additional information to answer a question.
+
+    Args:
+        query (str): The user's question or search query.
+
+    Returns:
+        List[Document]: A list of the top-ranked Document objects, limited to TOP_K (5) results.
+    """
+    retrieved_docs = retriever.invoke(query)
+    ranked_docs = compressor.compress_documents(documents=retrieved_docs, query=query)
+    return ranked_docs
+
+
+@tool
+def should_continue() -> None:
+    """
+    Use this tool if you determine that you have enough context to respond to the questions of the user.
+    """
+    return None
+
+
+# Initialize language model
 llm = ChatVertexAI(model=LLM_MODEL, temperature=0, max_tokens=1024)
 
-query_gen = query_rewrite_template | llm
+# Set up conversation inspector
+inspect_conversation = inspect_conversation_template | llm.bind_tools(
+    [retrieve_docs, should_continue], tool_choice="any"
+)
+
+# Set up response chain
 response_chain = rag_template | llm
 
 
@@ -62,24 +105,41 @@ def chain(
     input: Dict[str, Any], **kwargs: Any
 ) -> Iterator[OnToolEndEvent | OnChatModelStreamEvent]:
     """
-    Implements a RAG QA chain. Decorated with `custom_chain` to offer LangChain compatible astream_events
-    and invoke interface and OpenTelemetry tracing.
+    Implement a RAG QA chain with tool calls.
+
+    This function is decorated with `custom_chain` to offer LangChain compatible
+    astream_events, support for synchronous invocation through the `invoke` method,
+    and OpenTelemetry tracing.
     """
-    # Separate conversation messages from tool calls
-    input["messages"] = extract_human_ai_messages(input["messages"])
+    # Inspect conversation and determine next action
+    inspection_result = inspect_conversation.invoke(input)
+    tool_call_result = inspection_result.tool_calls[0]
 
-    # Generate optimized query
-    query = query_gen.invoke(input).content
+    # Execute the appropriate tool based on the inspection result
+    if tool_call_result["name"] == "retrieve_docs":
+        # Retrieve relevant documents
+        docs = retrieve_docs.invoke(tool_call_result["args"])
+        # Format the retrieved documents
+        formatted_docs = template_docs.format(docs=docs)
+        # Create a ToolMessage with the formatted documents
+        tool_message = ToolMessage(
+            tool_call_id=tool_call_result["name"],
+            name=tool_call_result["name"],
+            content=formatted_docs,
+            artifact=docs,
+        )
+    else:
+        # If no documents need to be retrieved, continue with the conversation
+        tool_message = should_continue.invoke(tool_call_result)
 
-    # Retrieve and rank documents
-    retrieved_docs = retriever.invoke(query)
-    ranked_docs = compressor.compress_documents(documents=retrieved_docs, query=query)
+    # Update input messages with new information
+    input["messages"] = input["messages"] + [inspection_result, tool_message]
 
     # Yield tool results metadata
-    yield create_on_tool_end_event_from_retrieval(query=query, docs=ranked_docs)
+    yield OnToolEndEvent(
+        data={"input": tool_call_result["args"], "output": tool_message}
+    )
 
     # Stream LLM response
-    for chunk in response_chain.stream(
-        input={"messages": input["messages"], "relevant_documents": ranked_docs}
-    ):
+    for chunk in response_chain.stream(input=input):
         yield OnChatModelStreamEvent(data={"chunk": chunk})

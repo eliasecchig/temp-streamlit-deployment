@@ -19,15 +19,13 @@ This folder implements a chatbot application using FastAPI, and Google Cloud ser
 
 ### 1. Default Chain
 
-The default chain is a simple conversational bot that produces recipes based on user questions. It uses the Gemini 1.5 Flash model.
+The default chain is a simple conversational bot that produces recipes based on user questions.
 
 ### 2. Custom RAG QA
 
-A pythonic RAG (Retrieval-Augmented Generation) chain designed for maximum flexibility in orchestrating different components. It includes:
+A RAG (Retrieval-Augmented Generation) chain using Python for orchestration and base LangChain components. The chain demonstrates how to create a production-grade application with full control over the orchestration process.
 
-- Query rewriting
-- Document retrieval and ranking
-- LLM-based response generation
+This approach offers maximum flexibility in the orchestration of steps and allows for seamless integration with other SDK frameworks such as [Vertex AI SDK](https://cloud.google.com/vertex-ai/docs/python-sdk/use-vertex-ai-python-sdk) and [LangChain](https://python.langchain.com/), retaining the support to emit `astream_events` [API compatible events](https://python.langchain.com/docs/how_to/streaming/#using-stream-events). 
 
 ### 3. LangGraph Dummy Agent
 

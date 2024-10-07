@@ -73,7 +73,7 @@ def display_messages() -> None:
         elif "tool_calls" in message and message["tool_calls"]:
             tool_call_input = handle_tool_call(message)
         elif message["type"] == "tool" and tool_call_input is not None:
-            display_tool_output(tool_call_input, message["content"])
+            display_tool_output(tool_call_input, message)
             tool_call_input = None
         else:
             st.error(f"Unexpected message type: {message['type']}")
@@ -165,7 +165,8 @@ def handle_user_input(side_bar: SideBar) -> None:
 
         display_user_input(parts)
         generate_ai_response(
-            side_bar.url_input_field, side_bar.should_authenticate_request
+            url_input_field=side_bar.url_input_field,
+            should_authenticate_request=side_bar.should_authenticate_request,
         )
         update_chat_title()
         if len(parts) > 1:
@@ -207,7 +208,7 @@ def update_chat_title() -> None:
     )
 
 
-def display_feedback() -> None:
+def display_feedback(side_bar: SideBar) -> None:
     if st.session_state.run_id is not None:
         feedback = streamlit_feedback(
             feedback_type="faces",
@@ -216,8 +217,8 @@ def display_feedback() -> None:
         )
         if feedback is not None:
             client = Client(
-                url=st.session_state.url_input_field,
-                authenticate_request=st.session_state.should_authenticate_request,
+                url=side_bar.url_input_field,
+                authenticate_request=side_bar.should_authenticate_request,
             )
             client.log_feedback(
                 feedback_dict=feedback,
@@ -231,8 +232,8 @@ def main() -> None:
     side_bar = SideBar(st=st)
     side_bar.init_side_bar()
     display_messages()
-    handle_user_input(side_bar)
-    display_feedback()
+    handle_user_input(side_bar=side_bar)
+    display_feedback(side_bar=side_bar)
 
 
 if __name__ == "__main__":

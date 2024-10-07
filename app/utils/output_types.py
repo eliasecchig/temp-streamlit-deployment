@@ -15,9 +15,8 @@
 import uuid
 from functools import wraps
 from types import GeneratorType
-from typing import Any, AsyncGenerator, Callable, Dict, List, Literal
+from typing import Any, AsyncGenerator, Callable, Dict, Literal
 
-from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, AIMessageChunk, ToolMessage
 from pydantic import BaseModel, Field
 from traceloop.sdk import TracerWrapper
@@ -66,32 +65,6 @@ class EndEvent(BaseModel):
     event: Literal["end"] = "end"
 
 
-def create_on_tool_end_event_from_retrieval(
-    query: str,
-    docs: List[Document],
-    tool_call_id: str = "retriever",
-    name: str = "retriever",
-) -> OnToolEndEvent:
-    """
-    Create a LangChain Astream events v2 compatible on_tool_end_event from a retrieval process.
-
-    Args:
-        query (str): The query used for retrieval.
-        docs (List[Document]): The retrieved documents.
-        tool_call_id (str, optional): The ID of the tool call. Defaults to "retriever".
-        name (str, optional): The name of the tool. Defaults to "retriever".
-
-    Returns:
-        OnToolEndEvent: An event representing the end of the retrieval tool execution.
-    """
-    ranked_docs_tool_output = ToolMessage(
-        tool_call_id=tool_call_id, content=[doc.model_dump() for doc in docs], name=name
-    )
-    return OnToolEndEvent(
-        data=ToolData(input={"query": query}, output=ranked_docs_tool_output)
-    )
-
-
 class CustomChain:
     """A custom chain class that wraps a callable function."""
 
@@ -111,6 +84,7 @@ class CustomChain:
             func = self.func
 
         gen: GeneratorType = func(*args, **kwargs)
+
         for event in gen:
             yield event.model_dump()
 

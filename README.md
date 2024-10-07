@@ -52,7 +52,7 @@ This starter kit covers all aspects of Generative AI app development, from proto
 
 | Description                                                                                                         | Visualization                                  |
 | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Seamlessly integrate with OpenTelemetry, Cloud Trace, Cloud Logging and BigQuery for comprehensive data collection and log every step of your GenAI application to unlock powerful insights. | ![Tracing Preview](images/tracing_preview.png) |
+| Seamlessly integrate with OpenTelemetry, Cloud Trace, Cloud Logging and BigQuery for comprehensive data collection and log every step of your Gen AI application to unlock powerful insights. | ![Tracing Preview](images/tracing_preview.png) |
 
 </details>
 

@@ -16,12 +16,12 @@ import os
 import uuid
 from typing import Any
 
+from utils.chat_utils import save_chat
 from utils.multimodal_utils import (
     HELP_GCS_CHECKBOX,
     HELP_MESSAGE_MULTIMODALITY,
     upload_files_to_gcs,
 )
-from utils.utils import save_chat
 
 EMPTY_CHAT_NAME = "Empty chat"
 NUM_CHAT_IN_RECENT = 3

@@ -22,9 +22,12 @@ SAVED_CHAT_PATH = str(os.getcwd()) + "/.saved_chats"
 
 
 def preprocess_text(text: str) -> str:
-    if text[0] == "\n":
+    if not text:
+        return text
+
+    if text.startswith("\n"):
         text = text[1:]
-    if text[-1] == "\n":
+    if text.endswith("\n"):
         text = text[:-1]
     return text
 
