@@ -125,7 +125,7 @@ class SideBar:
                 self.st.session_state.checkbox_state = True
 
             self.st.session_state.checkbox_state = self.st.checkbox(
-                "Upload to GCS first (suggested)", value=True, help=HELP_GCS_CHECKBOX
+                "Upload to GCS first (suggested)", value=False, help=HELP_GCS_CHECKBOX
             )
 
             self.uploaded_files = self.st.file_uploader(

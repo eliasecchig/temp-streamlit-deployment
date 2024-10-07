@@ -24,8 +24,8 @@ HELP_MESSAGE_MULTIMODALITY = (
 )
 
 HELP_GCS_CHECKBOX = (
-    "Enabling GCS upload will increase app performance by avoiding to"
-    " pass large byte strings to the model"
+    "Enabling GCS upload will increase the app observability by avoiding"
+    " forwarding and logging large byte strings within the app."
 )
 
 
