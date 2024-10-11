@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # mypy: disable-error-code="arg-type,attr-defined"
-# pylint: disable=W0613,W0622
+# noqa: W0613,W0622
 
 import logging
 from typing import Any, Dict, Iterator, List

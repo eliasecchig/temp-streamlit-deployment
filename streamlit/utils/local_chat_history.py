@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# noqa: E0611
 
 import os
 from datetime import datetime
@@ -53,10 +54,10 @@ class LocalChatMessageHistory(BaseChatMessageHistory):
                     conversation = yaml.safe_load(f)
                     if not isinstance(conversation, list) or len(conversation) > 1:
                         raise ValueError(
-                            f"""Invalid format in {file_path}. 
+                            f"""Invalid format in {file_path}.
                         YAML file can only contain one conversation with the following
                         structure.
-                          - messages: 
+                          - messages:
                               - content: [message text]
                               - type: (human or ai)"""
                         )

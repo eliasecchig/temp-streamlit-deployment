@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# pylint: disable=W0621,W0613,W3101
+# noqa: W0621,W0613,W3101,E0611
 
 import json
 from typing import Any, Dict, Generator, List, Optional
