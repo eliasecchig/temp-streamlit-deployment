@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# pylint: disable=W0718,C0411
-# ruff: noqa: I001
+# noqa: E266, W0718, C0411, I001
 
 import json
 import logging
