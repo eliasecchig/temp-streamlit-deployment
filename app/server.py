@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# pylint: disable=W0718,C0411
+# pylint: disable=W0718, C0411
 # ruff: noqa: I001
 
 import json
@@ -20,17 +20,17 @@ import os
 from typing import AsyncGenerator
 import uuid
 
+from app.chain import chain
+from app.utils.input_types import Feedback, Input, InputChat, default_serialization
+from app.utils.output_types import EndEvent, Event
+from app.utils.tracing import CloudTraceLoggingSpanExporter
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse, StreamingResponse
 from google.cloud import logging as google_cloud_logging
 from traceloop.sdk import Instruments, Traceloop
 
-from app.utils.input_types import Feedback, Input, InputChat, default_serialization
-from app.utils.output_types import EndEvent, Event
-from app.utils.tracing import CloudTraceLoggingSpanExporter
-
-## Import the chain to be used
-from app.chain import chain
+# Default chain
+# from app.chain import chain
 
 # Or choose one of the following pattern chains to test by uncommenting it:
 

@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# pylint: disable=W0201
+# pylint: disable=W0201, E0611
 
 import os
-import uuid
 from typing import Any
+import uuid
 
 from utils.chat_utils import save_chat
 from utils.multimodal_utils import (

@@ -11,9 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 # mypy: disable-error-code="arg-type,attr-defined"
-# pylint: disable=W0613,W0622
+# pylint: disable=W0613, W0622
 
 import logging
 from typing import Any, Dict, Iterator, List
