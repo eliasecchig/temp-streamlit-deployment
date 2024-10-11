@@ -14,7 +14,6 @@
 
 import glob
 import logging
-import os
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from typing import Any, Callable, Dict, Iterator, List
@@ -39,8 +38,8 @@ def load_chats(path: str) -> List[Dict[str, Any]]:
     """
 
     chats: List[Dict[str, Any]] = []
-    for path in glob.glob(path):
-        with open(path) as f:
+    for file_path in glob.glob(path):
+        with open(file_path) as f:
             chats_in_file = yaml.safe_load(f)
             chats = chats + chats_in_file
     return chats
@@ -91,12 +90,12 @@ def generate_multiturn_history(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(processed_messages)
 
 
-def generate_message(row: tuple[int, Dict[str, Any]], callable: Any) -> Dict[str, Any]:
-    """Generates a response message using a given callable and updates the row dictionary.
+def generate_message(row: tuple[int, Dict[str, Any]], runnable: Any) -> Dict[str, Any]:
+    """Generates a response message using a given runnable and updates the row dictionary.
 
-    This function takes a row dictionary containing message data and a callable object.
+    This function takes a row dictionary containing message data and a runnable object.
     It extracts conversation history and the current human message from the row,
-    then uses the callable to generate a response based on the conversation history.
+    then uses the runnable to generate a response based on the conversation history.
     The generated response content and usage metadata are then added to the original
     message dictionary within the row.
 
@@ -107,7 +106,7 @@ def generate_message(row: tuple[int, Dict[str, Any]], callable: Any) -> Dict[str
                       messages
                         in the conversation.
                    - "human_message" (str): The current human message.
-        callable (Any): A callable object that takes a dictionary with a "messages" key
+        runnable (Any): A runnable object that takes a dictionary with a "messages" key
                         and returns a response object with "content" and
                         "usage_metadata" attributes.
 
@@ -115,15 +114,15 @@ def generate_message(row: tuple[int, Dict[str, Any]], callable: Any) -> Dict[str
         Dict[str, Any]: The updated row dictionary with the generated response added to the message.
               The message will now contain:
               - "response" (str): The generated response content.
-              - "response_obj" (Any): The usage metadata of the response from the callable.
+              - "response_obj" (Any): The usage metadata of the response from the runnable.
     """
-    index, message = row
+    _, message = row
     messages = (
         message["conversation_history"] if "conversation_history" in message else []
     )
     messages.append(message["human_message"])
-    input_callable = {"messages": messages}
-    response = callable.invoke(input_callable)
+    input_runnable = {"messages": messages}
+    response = runnable.invoke(input_runnable)
     message["response"] = response.content
     message["response_obj"] = response.usage_metadata
     return message
@@ -131,13 +130,13 @@ def generate_message(row: tuple[int, Dict[str, Any]], callable: Any) -> Dict[str
 
 def batch_generate_messages(
     messages: pd.DataFrame,
-    callable: Callable[[List[Dict[str, Any]]], Dict[str, Any]],
+    runnable: Callable[[List[Dict[str, Any]]], Dict[str, Any]],
     max_workers: int = 4,
 ) -> pd.DataFrame:
-    """Generates AI responses to user messages using a provided callable.
+    """Generates AI responses to user messages using a provided runnable.
 
     Processes a Pandas DataFrame containing conversation histories and user messages, utilizing
-    the specified callable to predict AI responses in parallel.
+    the specified runnable to predict AI responses in parallel.
 
     Args:
         messages (pd.DataFrame): DataFrame with a 'messages' column. Each row
@@ -154,7 +153,7 @@ def batch_generate_messages(
             ]
             ```
 
-        callable (Callable[[List[Dict[str, Any]]], Dict[str, Any]]): Callable object
+        runnable (Callable[[List[Dict[str, Any]]], Dict[str, Any]]): Runnable object
           (e.g., LangChain Chain) used
             for response generation. It should accept a list of message dictionaries
             (as described above) and return a dictionary with the following structure:
@@ -191,54 +190,15 @@ def batch_generate_messages(
             ]
         })
 
-        responses_df = batch_generate_messages(my_callable, messages_df)
+        responses_df = batch_generate_messages(my_runnable, messages_df)
         ```
     """
     logging.info("Executing batch scoring")
     predicted_messages = []
     with ThreadPoolExecutor(max_workers) as pool:
-        partial_func = partial(generate_message, callable=callable)
+        partial_func = partial(generate_message, runnable=runnable)
         for message in tqdm(
             pool.map(partial_func, messages.iterrows()), total=len(messages)
         ):
             predicted_messages.append(message)
     return pd.DataFrame(predicted_messages)
-
-
-def save_df_to_csv(df: pd.DataFrame, dir_path: str, filename: str) -> None:
-    """Saves a pandas DataFrame to directory as a CSV file.
-
-    Args:
-        df: The DataFrame to save.
-        filename: The desired filename. Should end in `.csv`.
-        dir_path: The desired dir_path.
-    """
-
-    filepath = os.path.join(dir_path, filename)
-    os.makedirs(dir_path, exist_ok=True)
-    df.to_csv(filepath, index=False)
-    logging.info(f"DataFrame saved to: {filepath}")
-
-
-def import_llm_chain(llm_chain_path: str) -> Any:
-    """Dynamically imports the specified LLM chain class."""
-    llm_chain_module, llm_chain_name = llm_chain_path.rsplit(".", 1)
-    module = __import__(llm_chain_module, fromlist=[llm_chain_name])
-    llm_chain = getattr(module, llm_chain_name)
-    return llm_chain
-
-
-def prepare_metrics(metrics: List[str]) -> List[Any]:
-    """Prepares the list of metrics for evaluation, handling custom metrics."""
-    metrics_evaluation = []
-    for metric in metrics:
-        if metric.startswith("custom:"):
-            *module_path, metric_name = metric.removeprefix("custom:").split(".")
-            metrics_evaluation.append(
-                __import__(".".join(module_path), fromlist=[metric_name]).__dict__[
-                    metric_name
-                ]
-            )
-        else:
-            metrics_evaluation.append(metric)
-    return metrics_evaluation

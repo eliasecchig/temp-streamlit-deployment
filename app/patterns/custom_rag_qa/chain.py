@@ -13,6 +13,8 @@
 # limitations under the License.
 
 # mypy: disable-error-code="arg-type,attr-defined"
+# pylint: disable=W0613,W0622
+
 import logging
 from typing import Any, Dict, Iterator, List
 
@@ -30,11 +32,7 @@ from app.patterns.custom_rag_qa.templates import (
     template_docs,
 )
 from app.patterns.custom_rag_qa.vector_store import get_vector_store
-from app.utils.output_types import (
-    OnChatModelStreamEvent,
-    OnToolEndEvent,
-    custom_chain,
-)
+from app.utils.output_types import OnChatModelStreamEvent, OnToolEndEvent, custom_chain
 
 # Configuration
 EMBEDDING_MODEL = "text-embedding-004"

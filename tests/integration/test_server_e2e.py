@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=W0621,W0613,R0801
 
 import json
 import logging
@@ -54,19 +55,17 @@ def start_server() -> subprocess.Popen[str]:
         "--port",
         "8000",
     ]
-    process = subprocess.Popen(
+    with subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1
-    )
-
-    # Start threads to log stdout and stderr in real-time
-    threading.Thread(
-        target=log_output, args=(process.stdout, logger.info), daemon=True
-    ).start()
-    threading.Thread(
-        target=log_output, args=(process.stderr, logger.error), daemon=True
-    ).start()
-
-    return process
+    ) as process:
+        # Start threads to log stdout and stderr in real-time
+        threading.Thread(
+            target=log_output, args=(process.stdout, logger.info), daemon=True
+        ).start()
+        threading.Thread(
+            target=log_output, args=(process.stderr, logger.error), daemon=True
+        ).start()
+        return process
 
 
 def wait_for_server(timeout: int = 60, interval: int = 1) -> bool:
@@ -74,7 +73,7 @@ def wait_for_server(timeout: int = 60, interval: int = 1) -> bool:
     start_time = time.time()
     while time.time() - start_time < timeout:
         try:
-            response = requests.get("http://127.0.0.1:8000/docs")
+            response = requests.get("http://127.0.0.1:8000/docs", timeout=10)
             if response.status_code == 200:
                 logger.info("Server is ready")
                 return True
@@ -170,5 +169,7 @@ def test_collect_feedback(server_fixture: subprocess.Popen[str]) -> None:
         "text": "Great response!",
     }
 
-    response = requests.post(FEEDBACK_URL, json=feedback_data, headers=HEADERS)
+    response = requests.post(
+        FEEDBACK_URL, json=feedback_data, headers=HEADERS, timeout=10
+    )
     assert response.status_code == 200

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# # pylint: disable=W0201,E0611
 
 import os
 import uuid
@@ -29,10 +30,19 @@ DEFAULT_BASE_URL = "http://localhost:8000/"
 
 
 class SideBar:
+    """Manages the sidebar components of the Streamlit application."""
+
     def __init__(self, st: Any) -> None:
+        """
+        Initialize the SideBar.
+
+        Args:
+            st (Any): The Streamlit object for rendering UI components.
+        """
         self.st = st
 
     def init_side_bar(self) -> None:
+        """Initialize and render the sidebar components."""
         with self.st.sidebar:
             self.url_input_field = self.st.text_input(
                 label="Service URL",

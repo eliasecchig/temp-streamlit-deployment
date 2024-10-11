@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=W0718
 
 import base64
 from typing import Any, Dict, List, Optional, Union
@@ -30,57 +31,57 @@ HELP_GCS_CHECKBOX = (
 
 
 def format_content(content: Union[str, List[Dict[str, Any]]]) -> str:
+    """Formats content as a string, handling both text and multimedia inputs."""
     if isinstance(content, str):
         return content
     if len(content) == 1 and content[0]["type"] == "text":
         return content[0]["text"]
-    else:
-        markdown = """Media:
+    markdown = """Media:
 """
-        text = ""
-        for part in content:
-            if part["type"] == "text":
-                text = part["text"]
-            # Local Images:
-            if part["type"] == "image_url":
-                image_url = part["image_url"]["url"]
-                image_markdown = f'<img src="{image_url}" width="100">'
-                markdown = (
-                    markdown
-                    + f"""
+    text = ""
+    for part in content:
+        if part["type"] == "text":
+            text = part["text"]
+        # Local Images:
+        if part["type"] == "image_url":
+            image_url = part["image_url"]["url"]
+            image_markdown = f'<img src="{image_url}" width="100">'
+            markdown = (
+                markdown
+                + f"""
 - {image_markdown}
 """
-                )
-            if part["type"] == "media":
-                # Local other media
-                if "data" in part:
-                    markdown = markdown + f"- Local media: {part['file_name']}\n"
-                # From GCS:
-                if "file_uri" in part:
-                    # GCS images
-                    if "image" in part["mime_type"]:
-                        image_url = gs_uri_to_https_url(part["file_uri"])
-                        image_markdown = f'<img src="{image_url}" width="100">'
-                        markdown = (
-                            markdown
-                            + f"""
+            )
+        if part["type"] == "media":
+            # Local other media
+            if "data" in part:
+                markdown = markdown + f"- Local media: {part['file_name']}\n"
+            # From GCS:
+            if "file_uri" in part:
+                # GCS images
+                if "image" in part["mime_type"]:
+                    image_url = gs_uri_to_https_url(part["file_uri"])
+                    image_markdown = f'<img src="{image_url}" width="100">'
+                    markdown = (
+                        markdown
+                        + f"""
 - {image_markdown}
 """
-                        )
-                    # GCS other media
-                    else:
-                        image_url = gs_uri_to_https_url(part["file_uri"])
-                        markdown = (
-                            markdown + f"- Remote media: "
-                            f"[{part['file_uri']}]({image_url})\n"
-                        )
-        markdown = (
-            markdown
-            + f"""
+                    )
+                # GCS other media
+                else:
+                    image_url = gs_uri_to_https_url(part["file_uri"])
+                    markdown = (
+                        markdown + f"- Remote media: "
+                        f"[{part['file_uri']}]({image_url})\n"
+                    )
+    markdown = (
+        markdown
+        + f"""
 
 {text}"""
-        )
-        return markdown
+    )
+    return markdown
 
 
 def get_gcs_blob_mime_type(gcs_uri: str) -> Optional[str]:
@@ -102,7 +103,6 @@ def get_gcs_blob_mime_type(gcs_uri: str) -> Optional[str]:
         blob = bucket.blob(object_name)
         blob.reload()
         return blob.content_type
-
     except Exception as e:
         print(f"Error retrieving MIME type for {gcs_uri}: {e}")
         return None  # Indicate failure
@@ -111,6 +111,7 @@ def get_gcs_blob_mime_type(gcs_uri: str) -> Optional[str]:
 def get_parts_from_files(
     upload_gcs_checkbox: bool, uploaded_files: List[Any], gcs_uris: str
 ) -> List[Dict[str, Any]]:
+    """Processes uploaded files and GCS URIs to create a list of content parts."""
     parts = []
     # read from local directly
     if not upload_gcs_checkbox:
@@ -200,6 +201,7 @@ def gs_uri_to_https_url(gs_uri: str) -> str:
 
 
 def upload_files_to_gcs(st: Any, bucket_name: str, files_to_upload: List[Any]) -> None:
+    """Upload multiple files to Google Cloud Storage and store URIs in session state."""
     bucket_name = bucket_name.replace("gs://", "")
     uploaded_uris = []
     for file in files_to_upload:

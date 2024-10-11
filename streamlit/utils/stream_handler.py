@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=W0621,W0613,W3101
 
 import json
 from typing import Any, Dict, Generator, List, Optional
@@ -59,6 +60,7 @@ class Client:
         return token
 
     def log_feedback(self, feedback_dict: Dict[str, Any], run_id: str) -> None:
+        """Log user feedback for a specific run."""
         score = feedback_dict["score"]
         if score == "😞":
             score = 0.0

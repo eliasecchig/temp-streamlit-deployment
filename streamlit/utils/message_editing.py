@@ -16,8 +16,11 @@ from typing import Any
 
 
 class MessageEditing:
+    """Provides methods for editing, refreshing, and deleting chat messages."""
+
     @staticmethod
     def edit_message(st: Any, button_idx: int, message_type: str) -> None:
+        """Edit a message in the chat history."""
         button_id = f"edit_box_{button_idx}"
         if message_type == "human":
             messages = st.session_state.user_chats[st.session_state["session_id"]][
@@ -34,6 +37,7 @@ class MessageEditing:
 
     @staticmethod
     def refresh_message(st: Any, button_idx: int, content: str) -> None:
+        """Refresh a message in the chat history."""
         messages = st.session_state.user_chats[st.session_state["session_id"]][
             "messages"
         ]
@@ -44,6 +48,7 @@ class MessageEditing:
 
     @staticmethod
     def delete_message(st: Any, button_idx: int) -> None:
+        """Delete a message from the chat history."""
         messages = st.session_state.user_chats[st.session_state["session_id"]][
             "messages"
         ]

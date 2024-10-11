@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=W0621,W0613,W0212
 
 from typing import Any, Generator
 from unittest.mock import Mock, patch
@@ -25,21 +26,25 @@ from app.utils.tracing import CloudTraceLoggingSpanExporter
 
 @pytest.fixture
 def mock_logging_client() -> Mock:
+    """Create a mock logging client."""
     return Mock(spec=google_cloud_logging.Client)
 
 
 @pytest.fixture
 def mock_storage_client() -> Mock:
+    """Create a mock storage client."""
     return Mock(spec=storage.Client)
 
 
 @pytest.fixture
 def mock_credentials() -> Any:
+    """Create mock credentials."""
     return Mock()
 
 
 @pytest.fixture
 def patch_auth(mock_credentials: Any) -> Generator[Mock, None, None]:
+    """Patch the google.auth.default function."""
     with patch(
         "google.auth.default", return_value=(mock_credentials, "project")
     ) as mock_auth:
@@ -50,6 +55,7 @@ def patch_auth(mock_credentials: Any) -> Generator[Mock, None, None]:
 def patch_clients(
     mock_logging_client: Mock, mock_storage_client: Mock
 ) -> Generator[None, None, None]:
+    """Patch the logging and storage clients."""
     with patch("google.cloud.logging.Client", return_value=mock_logging_client):
         with patch("google.cloud.storage.Client", return_value=mock_storage_client):
             yield
@@ -63,6 +69,7 @@ def exporter(
     mock_credentials: Any,
     patch_clients: Any,
 ) -> CloudTraceLoggingSpanExporter:
+    """Create a CloudTraceLoggingSpanExporter instance for testing."""
     exporter = CloudTraceLoggingSpanExporter(
         project_id="test-project",
         logging_client=mock_logging_client,
@@ -74,12 +81,14 @@ def exporter(
 
 
 def test_init(exporter: CloudTraceLoggingSpanExporter) -> None:
+    """Test the initialization of CloudTraceLoggingSpanExporter."""
     assert exporter.project_id == "test-project"
     assert exporter.bucket_name == "test-bucket"
     assert exporter.debug is False
 
 
 def test_store_in_gcs(exporter: CloudTraceLoggingSpanExporter) -> None:
+    """Test the store_in_gcs method of CloudTraceLoggingSpanExporter."""
     span_id = "test-span-id"
     content = "test-content"
     uri = exporter.store_in_gcs(content, span_id)
@@ -91,6 +100,7 @@ def test_store_in_gcs(exporter: CloudTraceLoggingSpanExporter) -> None:
 def test_process_large_attributes_small_payload(
     mock_json_dumps: Mock, exporter: CloudTraceLoggingSpanExporter
 ) -> None:
+    """Test processing of small payload attributes."""
     mock_json_dumps.return_value = "a" * 100  # Small payload
     span_dict = {"attributes": {"key": "value"}}
     result = exporter._process_large_attributes(span_dict, "span-id")
@@ -101,6 +111,7 @@ def test_process_large_attributes_small_payload(
 def test_process_large_attributes_large_payload(
     mock_json_dumps: Mock, exporter: CloudTraceLoggingSpanExporter
 ) -> None:
+    """Test processing of large payload attributes."""
     mock_json_dumps.return_value = "a" * (400 * 1024 + 1)  # Large payload
     span_dict = {
         "attributes": {
@@ -119,6 +130,7 @@ def test_process_large_attributes_large_payload(
 def test_export(
     mock_process_large_attributes: Mock, exporter: CloudTraceLoggingSpanExporter
 ) -> None:
+    """Test the export method of CloudTraceLoggingSpanExporter."""
     mock_span = Mock(spec=ReadableSpan)
     mock_span.get_span_context.return_value.trace_id = 123
     mock_span.get_span_context.return_value.span_id = 456

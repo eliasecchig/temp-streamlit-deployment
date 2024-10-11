@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-markdown_str = """
+MARKDOWN_STR = """
 <style>
 button[kind="primary"] {
     background: none!important;

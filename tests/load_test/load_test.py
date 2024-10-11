@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=R0801
 
 import json
 import os
@@ -20,10 +21,13 @@ from locust import HttpUser, between, task
 
 
 class ChatStreamUser(HttpUser):
+    """Simulates a user interacting with the chat stream API."""
+
     wait_time = between(1, 3)  # Wait 1-3 seconds between tasks
 
     @task
     def chat_stream(self) -> None:
+        """Simulates a chat stream interaction."""
         headers = {"Content-Type": "application/json"}
         if os.environ.get("_ID_TOKEN"):
             headers["Authorization"] = f'Bearer {os.environ["_ID_TOKEN"]}'

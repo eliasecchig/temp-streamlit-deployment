@@ -22,6 +22,8 @@ from utils.title_summary import chain_title
 
 
 class LocalChatMessageHistory(BaseChatMessageHistory):
+    """Manages local storage and retrieval of chat message history."""
+
     def __init__(
         self,
         user_id: str,
@@ -37,10 +39,12 @@ class LocalChatMessageHistory(BaseChatMessageHistory):
         os.makedirs(self.user_dir, exist_ok=True)
 
     def get_session(self, session_id: str) -> None:
+        """Updates the session ID and file path for the current session."""
         self.session_id = session_id
         self.session_file = os.path.join(self.user_dir, f"{session_id}.yaml")
 
     def get_all_conversations(self) -> Dict[str, Dict]:
+        """Retrieves all conversations for the current user."""
         conversations = {}
         for filename in os.listdir(self.user_dir):
             if filename.endswith(".yaml"):
@@ -56,7 +60,6 @@ class LocalChatMessageHistory(BaseChatMessageHistory):
                               - content: [message text]
                               - type: (human or ai)"""
                         )
-
                     conversation = conversation[0]
                     if "title" not in conversation:
                         conversation["title"] = filename
@@ -66,6 +69,7 @@ class LocalChatMessageHistory(BaseChatMessageHistory):
         )
 
     def upsert_session(self, session: Dict) -> None:
+        """Updates or inserts a session into the local storage."""
         session["update_time"] = datetime.now().isoformat()
         with open(self.session_file, "w") as f:
             yaml.dump(
@@ -93,7 +97,6 @@ class LocalChatMessageHistory(BaseChatMessageHistory):
             None
         """
         if session["messages"]:
-
             messages = session["messages"] + [
                 {
                     "type": "human",
@@ -112,5 +115,6 @@ class LocalChatMessageHistory(BaseChatMessageHistory):
             self.upsert_session(session)
 
     def clear(self) -> None:
+        """Removes the current session file if it exists."""
         if os.path.exists(self.session_file):
             os.remove(self.session_file)

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=E0611
 
 import json
 import uuid
@@ -20,7 +21,7 @@ from typing import Any, Dict, List
 from langchain_core.messages import HumanMessage
 from side_bar import SideBar
 from streamlit_feedback import streamlit_feedback
-from style.app_markdown import markdown_str
+from style.app_markdown import MARKDOWN_STR
 from utils.local_chat_history import LocalChatMessageHistory
 from utils.message_editing import MessageEditing
 from utils.multimodal_utils import format_content, get_parts_from_files
@@ -33,6 +34,7 @@ EMPTY_CHAT_NAME = "Empty chat"
 
 
 def setup_page() -> None:
+    """Configure the Streamlit page settings."""
     st.set_page_config(
         page_title="Playground",
         layout="wide",
@@ -40,10 +42,11 @@ def setup_page() -> None:
         menu_items=None,
     )
     st.title("Playground")
-    st.markdown(markdown_str, unsafe_allow_html=True)
+    st.markdown(MARKDOWN_STR, unsafe_allow_html=True)
 
 
 def initialize_session_state() -> None:
+    """Initialize the session state with default values."""
     if "user_chats" not in st.session_state:
         st.session_state["session_id"] = str(uuid.uuid4())
         st.session_state.uploader_key = 0
@@ -65,6 +68,7 @@ def initialize_session_state() -> None:
 
 
 def display_messages() -> None:
+    """Display all messages in the current chat session."""
     messages = st.session_state.user_chats[st.session_state["session_id"]]["messages"]
     tool_call_input = None
     for i, message in enumerate(messages):
@@ -82,6 +86,7 @@ def display_messages() -> None:
 
 
 def display_chat_message(message: Dict[str, Any], index: int) -> None:
+    """Display a single chat message with edit, refresh, and delete options."""
     chat_message = st.chat_message(message["type"])
     with chat_message:
         st.markdown(format_content(message["content"]), unsafe_allow_html=True)
@@ -92,6 +97,7 @@ def display_chat_message(message: Dict[str, Any], index: int) -> None:
 def display_message_buttons(
     message: Dict[str, Any], index: int, col1: Any, col2: Any, col3: Any
 ) -> None:
+    """Display edit, refresh, and delete buttons for a chat message."""
     edit_button = f"{index}_edit"
     refresh_button = f"{index}_refresh"
     delete_button = f"{index}_delete"
@@ -129,6 +135,7 @@ def display_message_buttons(
 
 
 def handle_tool_call(message: Dict[str, Any]) -> Dict[str, Any]:
+    """Process a tool call message and return the first tool call."""
     if len(message["tool_calls"]) > 1:
         raise ValueError("Expected only one tool call, but found multiple.")
     return message["tool_calls"][0]
@@ -137,6 +144,7 @@ def handle_tool_call(message: Dict[str, Any]) -> Dict[str, Any]:
 def display_tool_output(
     tool_call_input: Dict[str, Any], tool_call_output: Dict[str, Any]
 ) -> None:
+    """Display the input and output of a tool call in an expander."""
     tool_expander = st.expander(label="Tool Calls:", expanded=False)
     with tool_expander:
         msg = (
@@ -149,6 +157,7 @@ def display_tool_output(
 
 
 def handle_user_input(side_bar: SideBar) -> None:
+    """Process user input, generate AI response, and update chat history."""
     prompt = st.chat_input() or st.session_state.modified_prompt
     if prompt:
         st.session_state.modified_prompt = None
@@ -175,6 +184,7 @@ def handle_user_input(side_bar: SideBar) -> None:
 
 
 def display_user_input(parts: List[Dict[str, Any]]) -> None:
+    """Display the user's input in the chat interface."""
     human_message = st.chat_message("human")
     with human_message:
         existing_user_input = format_content(parts)
@@ -184,6 +194,7 @@ def display_user_input(parts: List[Dict[str, Any]]) -> None:
 def generate_ai_response(
     url_input_field: str, should_authenticate_request: bool
 ) -> None:
+    """Generate and display the AI's response to the user's input."""
     ai_message = st.chat_message("ai")
     with ai_message:
         status = st.status("Generating answer🤖")
@@ -196,6 +207,7 @@ def generate_ai_response(
 
 
 def update_chat_title() -> None:
+    """Update the chat title if it's currently empty."""
     if (
         st.session_state.user_chats[st.session_state["session_id"]]["title"]
         == EMPTY_CHAT_NAME
@@ -209,6 +221,7 @@ def update_chat_title() -> None:
 
 
 def display_feedback(side_bar: SideBar) -> None:
+    """Display a feedback component and log the feedback if provided."""
     if st.session_state.run_id is not None:
         feedback = streamlit_feedback(
             feedback_type="faces",
@@ -227,6 +240,7 @@ def display_feedback(side_bar: SideBar) -> None:
 
 
 def main() -> None:
+    """Main function to set up and run the Streamlit app."""
     setup_page()
     initialize_session_state()
     side_bar = SideBar(st=st)
