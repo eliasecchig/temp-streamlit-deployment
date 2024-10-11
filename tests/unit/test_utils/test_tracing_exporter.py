@@ -11,17 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# noqa: W0621,W0613,W0212
+# pylint: disable=W0621,W0613,W0212
 
 from typing import Any, Generator
 from unittest.mock import Mock, patch
 
-import pytest
+from app.utils.tracing import CloudTraceLoggingSpanExporter
 from google.cloud import logging as google_cloud_logging
 from google.cloud import storage
 from opentelemetry.sdk.trace import ReadableSpan
-
-from app.utils.tracing import CloudTraceLoggingSpanExporter
+import pytest
 
 
 @pytest.fixture

@@ -11,21 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# noqa: W0621,W0613,W3101,E0611
+# pylint: disable=W0621,W0613,W3101,E0611
 
 import json
 from typing import Any, Dict, Generator, List, Optional
 from urllib.parse import urljoin
 
 import google.auth
+from google.auth.exceptions import DefaultCredentialsError
 import google.auth.transport.requests
 import google.oauth2.id_token
-import requests
-from google.auth.exceptions import DefaultCredentialsError
 from langchain_core.messages import AIMessage, ToolMessage
-from utils.multimodal_utils import format_content
-
+import requests
 import streamlit as st
+from utils.multimodal_utils import format_content
 
 
 @st.cache_resource()

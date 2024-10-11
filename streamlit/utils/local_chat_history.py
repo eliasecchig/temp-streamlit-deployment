@@ -11,15 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# noqa: E0611
+# pylint: disable=E0611
 
-import os
 from datetime import datetime
+import os
 from typing import Dict
 
-import yaml
 from langchain_core.chat_history import BaseChatMessageHistory
 from utils.title_summary import chain_title
+import yaml
 
 
 class LocalChatMessageHistory(BaseChatMessageHistory):

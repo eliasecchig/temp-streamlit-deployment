@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# noqa: W0707,C0415
+# pylint: disable=W0707,C0415
 
 import json
 import logging
@@ -19,12 +19,11 @@ import os
 from typing import Any, Generator
 from unittest.mock import MagicMock, patch
 
-import pytest
+from app.utils.input_types import InputChat
 from google.auth.credentials import Credentials
 from httpx import AsyncClient
 from langchain_core.messages import HumanMessage
-
-from app.utils.input_types import InputChat
+import pytest
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -88,9 +87,8 @@ def test_redirect_root_to_docs() -> None:
     """
     Test that the root endpoint (/) redirects to the Swagger UI documentation.
     """
-    from fastapi.testclient import TestClient
-
     from app.server import app
+    from fastapi.testclient import TestClient
 
     client = TestClient(app)
     response = client.get("/")

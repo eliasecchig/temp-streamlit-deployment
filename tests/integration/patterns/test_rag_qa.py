@@ -11,15 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# noqa: R0801
+# pylint: disable=R0801
 
 import logging
 
-import pytest
-from langchain_core.messages import AIMessageChunk, HumanMessage
-
 from app.patterns.custom_rag_qa.chain import chain
 from app.utils.output_types import OnToolEndEvent
+from langchain_core.messages import AIMessageChunk, HumanMessage
+import pytest
 
 CHAIN_NAME = "Rag QA"
 

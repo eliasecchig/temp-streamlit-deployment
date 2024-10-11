@@ -26,9 +26,9 @@ class MessageEditing:
             messages = st.session_state.user_chats[st.session_state["session_id"]][
                 "messages"
             ]
-            st.session_state.user_chats[st.session_state["session_id"]]["messages"] = (
-                messages[:button_idx]
-            )
+            st.session_state.user_chats[st.session_state["session_id"]][
+                "messages"
+            ] = messages[:button_idx]
             st.session_state.modified_prompt = st.session_state[button_id]
         else:
             st.session_state.user_chats[st.session_state["session_id"]]["messages"][
@@ -41,9 +41,9 @@ class MessageEditing:
         messages = st.session_state.user_chats[st.session_state["session_id"]][
             "messages"
         ]
-        st.session_state.user_chats[st.session_state["session_id"]]["messages"] = (
-            messages[:button_idx]
-        )
+        st.session_state.user_chats[st.session_state["session_id"]][
+            "messages"
+        ] = messages[:button_idx]
         st.session_state.modified_prompt = content
 
     @staticmethod
@@ -52,6 +52,6 @@ class MessageEditing:
         messages = st.session_state.user_chats[st.session_state["session_id"]][
             "messages"
         ]
-        st.session_state.user_chats[st.session_state["session_id"]]["messages"] = (
-            messages[:button_idx]
-        )
+        st.session_state.user_chats[st.session_state["session_id"]][
+            "messages"
+        ] = messages[:button_idx]
