@@ -53,6 +53,22 @@ def pairwise(iterable: List[Any]) -> Iterator[tuple[Any, Any]]:
     return zip(a, a)
 
 
+def _process_conversation(row: Dict[str, List[str]]) -> List[Dict[str, Any]]:
+    """Processes a single conversation row to extract messages and build conversation history."""
+    conversation_history: List[Dict] = []
+    messages = []
+    for human_message, ai_message in pairwise(row["messages"]):
+        messages.append(
+            {
+                "human_message": human_message,
+                "ai_message": ai_message,
+                "conversation_history": conversation_history.copy(),
+            }
+        )
+        conversation_history.extend([human_message, ai_message])
+    return messages
+
+
 def generate_multiturn_history(df: pd.DataFrame) -> pd.DataFrame:
     """Processes a DataFrame of conversations to create a multi-turn history.
 
@@ -75,18 +91,7 @@ def generate_multiturn_history(df: pd.DataFrame) -> pd.DataFrame:
                           - conversation_history: A list of all messages in the conversation
                                                   up to and including the current turn.
     """
-    processed_messages = []
-    for _, row in df.iterrows():
-        conversation_history: List[str] = []
-        for human_message, ai_message in pairwise(row["messages"]):
-            message = {
-                "human_message": human_message,
-                "ai_message": ai_message,
-                "conversation_history": conversation_history,
-            }
-            conversation_history = conversation_history + [human_message, ai_message]
-            processed_messages.append(message)
-
+    processed_messages = df.apply(_process_conversation, axis=1).explode().tolist()
     return pd.DataFrame(processed_messages)
 
 

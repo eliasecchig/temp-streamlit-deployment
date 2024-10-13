@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# mypy: disable-error-code="unused-ignore, union-attr"
 
 from typing import Dict
 
@@ -43,7 +44,7 @@ llm = ChatVertexAI(
 def should_continue(state: MessagesState) -> str:
     """Determines whether to use tools or end the conversation."""
     last_message = state["messages"][-1]
-    return "tools" if last_message.tool_calls else END  # type: ignore[union-attr]
+    return "tools" if last_message.tool_calls else END
 
 
 async def call_model(

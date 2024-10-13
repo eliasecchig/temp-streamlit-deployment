@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# pylint: disable=W0621, W0613, R0801
+# pylint: disable=W0621, W0613, R0801, R1732
 
 import json
 import logging
@@ -55,17 +55,19 @@ def start_server() -> subprocess.Popen[str]:
         "--port",
         "8000",
     ]
-    with subprocess.Popen(
+    process = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1
-    ) as process:
-        # Start threads to log stdout and stderr in real-time
-        threading.Thread(
-            target=log_output, args=(process.stdout, logger.info), daemon=True
-        ).start()
-        threading.Thread(
-            target=log_output, args=(process.stderr, logger.error), daemon=True
-        ).start()
-        return process
+    )
+
+    # Start threads to log stdout and stderr in real-time
+    threading.Thread(
+        target=log_output, args=(process.stdout, logger.info), daemon=True
+    ).start()
+    threading.Thread(
+        target=log_output, args=(process.stderr, logger.error), daemon=True
+    ).start()
+
+    return process
 
 
 def wait_for_server(timeout: int = 60, interval: int = 1) -> bool:

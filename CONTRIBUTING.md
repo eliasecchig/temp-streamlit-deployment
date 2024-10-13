@@ -23,7 +23,7 @@ poetry install --with streamlit,jupyter,lint
 
 This installs development dependencies, including linting tools.
 
-Then, execute the following Makefile targets:
+Then, execute the following Make command:
 
 ```bash
 make lint
@@ -32,8 +32,10 @@ make lint
 This command runs the following linters to check for code style, potential errors, and type hints:
 
 - **codespell**: Detects common spelling mistakes in code and documentation.
-- **ruff**: A fast linter that combines the functionality of several popular tools like flake8, isort, pycodestyle, and others.
+- **pylint**: Analyzes code for errors, coding standards, and potential problems.
+- **flake8**: Enforces style consistency and checks for logical errors.
 - **mypy**: Performs static type checking to catch type errors before runtime.
+- **black**: Automatically formats Python code to adhere to the PEP 8 style guide.
 
 ```bash
 make test

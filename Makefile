@@ -15,6 +15,7 @@ load_test:
 
 lint:
 	poetry run codespell
-	poetry run ruff .
+	poetry run flake8 .
+	poetry run pylint .
 	poetry run mypy .
 	poetry run black .
