@@ -21,6 +21,7 @@ from typing import Any, Generator
 from unittest.mock import MagicMock, patch
 
 from app.utils.input_types import InputChat
+from google.auth import exceptions as google_auth_exceptions
 from google.auth.credentials import Credentials
 from httpx import AsyncClient
 from langchain_core.messages import HumanMessage
@@ -73,20 +74,22 @@ def mock_dependencies() -> Generator[None, None, None]:
     Patches VertexAIEmbeddings (if defined) and ChatVertexAI.
     """
     patches = []
-
     try:
-        importlib.util.find_spec("app.chain.VertexAIEmbeddings")
-    except ModuleNotFoundError:
-        pass
-    else:
-        patches.append(patch("app.chain.VertexAIEmbeddings"))
-    patches.append(patch("app.chain.ChatVertexAI"))
+        try:
+            importlib.util.find_spec("app.chain.VertexAIEmbeddings")
+        except (ModuleNotFoundError, google_auth_exceptions.DefaultCredentialsError):
+            pass
+        else:
+            patches.append(patch("app.chain.VertexAIEmbeddings"))
+        patches.append(patch("app.chain.ChatVertexAI"))
 
-    for patch_item in patches:
-        mock = patch_item.start()
-        mock.return_value = MagicMock()
+        for patch_item in patches:
+            mock = patch_item.start()
+            mock.return_value = MagicMock()
 
-    yield
+        yield
+    except google_auth_exceptions.GoogleAuthError:
+        yield 
 
 
 class AsyncIterator:
