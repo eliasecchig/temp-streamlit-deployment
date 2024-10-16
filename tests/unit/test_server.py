@@ -13,6 +13,7 @@
 # limitations under the License.
 # pylint: disable=W0707, C0415
 
+import importlib.util
 import json
 import logging
 import os
@@ -67,16 +68,18 @@ def sample_input_chat() -> InputChat:
 
 @pytest.fixture(autouse=True)
 def mock_dependencies() -> Generator[None, None, None]:
-    """Mock Vertex AI dependencies for testing.
-    Patches VertexAIEmbeddings if defined, and ChatVertexAI."""
+    """
+    Mock Vertex AI dependencies for testing.
+    Patches VertexAIEmbeddings (if defined) and ChatVertexAI.
+    """
     patches = []
 
     try:
-        from app.chain import VertexAIEmbeddings  # type: ignore # noqa: F401 # pylint: disable=W0611
-
-        patches.append(patch("app.chain.VertexAIEmbeddings"))
-    except ImportError:
+        importlib.util.find_spec("app.chain.VertexAIEmbeddings")
+    except ModuleNotFoundError:
         pass
+    else:
+        patches.append(patch("app.chain.VertexAIEmbeddings"))
     patches.append(patch("app.chain.ChatVertexAI"))
 
     for patch_item in patches:
