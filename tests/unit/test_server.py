@@ -65,6 +65,19 @@ def sample_input_chat() -> InputChat:
     )
 
 
+@pytest.fixture(autouse=True)
+def mock_dependencies() -> Generator[None, None, None]:
+    """Mock Vertex AI dependencies for testing."""
+    with patch("app.chain.VertexAIEmbeddings") as mock_embeddings, patch(
+        "app.chain.ChatVertexAI"
+    ) as mock_chat:
+
+        mock_embeddings.return_value = MagicMock()
+        mock_chat.return_value = MagicMock()
+
+        yield
+
+
 class AsyncIterator:
     """
     A helper class to create asynchronous iterators for testing.
@@ -87,13 +100,14 @@ def test_redirect_root_to_docs() -> None:
     """
     Test that the root endpoint (/) redirects to the Swagger UI documentation.
     """
-    from app.server import app
-    from fastapi.testclient import TestClient
+    with patch("app.server.chain") as _:
+        from app.server import app
+        from fastapi.testclient import TestClient
 
-    client = TestClient(app)
-    response = client.get("/")
-    assert response.status_code == 200
-    assert "Swagger UI" in response.text
+        client = TestClient(app)
+        response = client.get("/")
+        assert response.status_code == 200
+        assert "Swagger UI" in response.text
 
 
 @pytest.mark.asyncio
