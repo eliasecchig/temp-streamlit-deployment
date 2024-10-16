@@ -67,15 +67,23 @@ def sample_input_chat() -> InputChat:
 
 @pytest.fixture(autouse=True)
 def mock_dependencies() -> Generator[None, None, None]:
-    """Mock Vertex AI dependencies for testing."""
-    with patch("app.chain.VertexAIEmbeddings") as mock_embeddings, patch(
-        "app.chain.ChatVertexAI"
-    ) as mock_chat:
+    """Mock Vertex AI dependencies for testing.
+    Patches VertexAIEmbeddings if defined, and ChatVertexAI."""
+    patches = []
 
-        mock_embeddings.return_value = MagicMock()
-        mock_chat.return_value = MagicMock()
+    try:
+        from app.chain import VertexAIEmbeddings  # type: ignore # noqa: F401 # pylint: disable=W0611
 
-        yield
+        patches.append(patch("app.chain.VertexAIEmbeddings"))
+    except ImportError:
+        pass
+    patches.append(patch("app.chain.ChatVertexAI"))
+
+    for patch_item in patches:
+        mock = patch_item.start()
+        mock.return_value = MagicMock()
+
+    yield
 
 
 class AsyncIterator:
