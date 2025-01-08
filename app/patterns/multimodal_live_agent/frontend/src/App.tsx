@@ -37,7 +37,7 @@ function App() {
   const [sendFeedback, setShowFeedback] = useState(false);
 
   const submitFeedback = async () => {
-    const feedbackUrl = serverUrl.replace('ws://', 'http://').replace('wss://', 'https://')+"feedback";
+    const feedbackUrl = new URL('feedback', serverUrl.replace('ws', 'http')).href;
     
     try {
       const response = await fetch(feedbackUrl, {

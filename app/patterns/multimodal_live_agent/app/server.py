@@ -84,7 +84,7 @@ class GeminiSession:
                 elif "setup" in data:
                     self.run_id = data["setup"]["run_id"]
                     self.user_id = data["setup"]["user_id"]
-                    print(data["setup"])
+                    logging.info(f'Setup data: {data["setup"]}')
                 else:
                     logging.warning(f"Received unexpected input from client: {data}")
             except ConnectionClosedError as e:
@@ -190,7 +190,6 @@ class Feedback(BaseModel):
 @app.post("/feedback")
 async def collect_feedback(feedback_dict: Feedback) -> None:
     """Collect and log feedback."""
-    print(feedback_dict)
     feedback_data = feedback_dict.model_dump()
     logger.log_struct(feedback_data, severity="INFO")
 

@@ -75,7 +75,7 @@ export class MultimodalLiveClient extends EventEmitter<MultimodalLiveClientEvent
   constructor({ url, userId, runId }: MultimodalLiveAPIClientConnection) {
     super();
     url = url || `ws://localhost:8000/ws`;
-    this.url = url + "ws";
+    this.url = new URL("ws", url).href;
     this.userId = userId;
     this.runId = runId || crypto.randomUUID(); // Ensure runId is always a string by providing default
     this.send = this.send.bind(this);
@@ -175,9 +175,7 @@ export class MultimodalLiveClient extends EventEmitter<MultimodalLiveClientEvent
     return false;
   }
   protected async receive(blob: Blob) {
-    const response: LiveIncomingMessage = (await blobToJSON(
-      blob,
-    )) as LiveIncomingMessage;
+    const response = (await blobToJSON(blob)) as LiveIncomingMessage;
     console.log("Parsed response:", response);
 
     if (isToolCallMessage(response)) {
