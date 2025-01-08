@@ -36,7 +36,7 @@ Before you begin, ensure you have the following installed: [Python 3.10+](https:
 Download the Multimodal Live Agent pattern using `gsutil` CLI:
 
 ```bash
-gsutil cp gs://e2e-gen-ai-app-starter-pack/multimodal_live_agent.zip . && unzip multimodal_live_agent.zip && cd multimodal_live_agent
+gsutil cp gs://e2e-gen-ai-app-starter-pack/multimodal-live-agent.zip . && unzip multimodal-live-agent.zip && cd multimodal-live-agent
 ```
 
 #### Backend Setup
