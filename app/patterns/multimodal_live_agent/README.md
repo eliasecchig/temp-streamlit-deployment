@@ -99,7 +99,7 @@ gsutil cp gs://e2e-gen-ai-app-starter-pack/multimodal_live_agent.zip . && unzip 
 
 #### Interact with the Agent
 
-Once both the backend and frontend are running, click the play button in the frontend UI to establish a connection with the backend. You can now interact with the Multimodal Live Agent!
+Once both the backend and frontend are running, click the play button in the frontend UI to establish a connection with the backend. You can now interact with the Multimodal Live Agent! You can try asking questions such as "Define Governance in the context MLOPs" to allow the agent to use the [documentation](https://cloud.google.com/architecture/deploy-operate-generative-ai-applications) it was provided to.
 
 #### Remote deployment in Cloud Run
 
