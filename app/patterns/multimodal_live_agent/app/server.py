@@ -45,7 +45,7 @@ app.add_middleware(
 )
 logging_client = google_cloud_logging.Client()
 logger = logging_client.logger(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class GeminiSession:

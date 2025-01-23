@@ -19,6 +19,9 @@ import google
 import vertexai
 from google import genai
 from google.genai.types import LiveConnectConfig, Content, FunctionDeclaration, Tool
+from bs4 import BeautifulSoup
+import requests
+from langchain_community.document_loaders import WebBaseLoader
 from langchain_google_vertexai import VertexAIEmbeddings
 
 from app.templates import SYSTEM_INSTRUCTION, FORMAT_DOCS
@@ -49,7 +52,6 @@ embedding = VertexAIEmbeddings(model_name=EMBEDDING_MODEL)
 vector_store = get_vector_store(embedding=embedding, urls=URLS)
 retriever = vector_store.as_retriever()
 
-
 def retrieve_docs(query: str) -> Dict[str, str]:
     """
     Retrieves pre-formatted documents about MLOps (Machine Learning Operations),
@@ -66,6 +68,24 @@ def retrieve_docs(query: str) -> Dict[str, str]:
     return {"output": formatted_docs}
 
 
+def retrieve_url(url: str) -> Dict[str, str]:
+    """
+    Retrieves and extracts text content from a webpage at the specified URL.
+
+    Args:
+        url (str): The complete URL of the webpage to fetch content from.
+            Must be a valid, accessible HTTP/HTTPS URL.
+    Returns:
+        Dict[str, str]: A dictionary containing:
+            - 'output': The raw text content extracted from the webpage,
+              with HTML tags and formatting removed.
+    """
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    doc = soup.get_text()
+    return {"output": doc}
+
+
 # Configure tools and live connection
 retrieve_docs_tool = Tool(
     function_declarations=[
@@ -73,10 +93,19 @@ retrieve_docs_tool = Tool(
     ]
 )
 
-tool_functions = {"retrieve_docs": retrieve_docs}
+retrieve_url_tool = Tool(
+    function_declarations=[
+        FunctionDeclaration.from_function(client=genai_client, func=retrieve_url)
+    ]
+)
+
+tool_functions = {
+    "retrieve_docs": retrieve_docs,
+    "retrieve_url": retrieve_url
+}
 
 live_connect_config = LiveConnectConfig(
     response_modalities=["AUDIO"],
-    tools=[retrieve_docs_tool],
+    tools=[retrieve_docs_tool, retrieve_url_tool],
     system_instruction=Content(parts=[{"text": SYSTEM_INSTRUCTION}]),
 )
